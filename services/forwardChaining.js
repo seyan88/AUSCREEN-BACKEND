@@ -6,16 +6,21 @@ function runForwardChaining(answers) {
   const domainScores = { S: 0, L: 0, SM: 0, CI: 0 };
 
   // 1. Hitung skor per pertanyaan
-  // answers formatnya: { "0": 3, "1": 1, "2": 0, ... }
+  // Frontend mengirimkan object: { "0": 3, "1": 1, "2": 0, ... }
   QUESTIONS.forEach((q, i) => {
-    // Jika tidak ada jawaban, default ke 0
-    const raw = answers[i] ?? 0; 
+    // Ambil jawaban berdasarkan index. Gunakan parseInt untuk berjaga-jaga jika frontend mengirim string
+    // Jika user belum menjawab soal tersebut (undefined), jadikan default 0
+    let raw = 0;
+    if (answers[i] !== undefined && answers[i] !== null) {
+      raw = parseInt(answers[i]); 
+    }
     
     // Balikkan nilai jika properti reversed = true
     const score = q.reversed ? (3 - raw) : raw;
     domainScores[q.domain] += score;
   });
 
+  // Hitung total keseluruhan skor
   const total = Object.values(domainScores).reduce((a, b) => a + b, 0);
   const firedRules = [];
   const workingMemory = {};
@@ -25,11 +30,12 @@ function runForwardChaining(answers) {
     const s = domainScores[key];
     workingMemory[`domain_${key}_score`] = s;
     
+    // Jika skor domain melewati batas threshold
     if (s >= d.threshold) {
       workingMemory[`domain_${key}_high`] = true;
       firedRules.push({
         id: `R_${key}`,
-        label: `Skor ${d.label} ≥ ${d.threshold}`,
+        label: `Skor ${d.label} >= ${d.threshold}`,
         desc: `Skor ${d.label} Anda (${s}) melebihi ambang batas klinis (${d.threshold}).`,
         domain: key,
         severity: "high",
@@ -54,14 +60,14 @@ function runForwardChaining(answers) {
     workingMemory.total_high = true;
     firedRules.push({
       id: "R_TOTAL",
-      label: `Total Skor ≥ ${TOTAL_THRESHOLD}`,
+      label: `Total Skor >= ${TOTAL_THRESHOLD}`,
       desc: `Total skor Anda (${total}) melampaui ambang batas RAADS-R (${TOTAL_THRESHOLD}).`,
       severity: "critical",
     });
   }
 
   // 5. Kesimpulan Akhir
-  // Perhatikan: Kita mengirim properti warna (color, bg) langsung dari backend!
+  // Data ini dikirim utuh ke frontend agar frontend tinggal menampilkannya saja
   let conclusion;
   if (workingMemory.total_high && workingMemory.multi_domain_high) {
     conclusion = { 
@@ -101,7 +107,7 @@ function runForwardChaining(answers) {
     };
   }
 
-  // Mengembalikan objek final yang siap "dilahap" oleh frontend
+  // Mengembalikan hasil (Sesuai dengan API Contract yang diminta teman Anda)
   return { 
     domainScores, 
     total, 
