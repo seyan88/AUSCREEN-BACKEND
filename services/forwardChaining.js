@@ -66,44 +66,49 @@ function runForwardChaining(answers) {
     });
   }
 
-  // 5. Kesimpulan Akhir
+  // 5. Kesimpulan Akhir (Disesuaikan dengan Rentang Skor Permintaan Anda)
   // Data ini dikirim utuh ke frontend agar frontend tinggal menampilkannya saja
   let conclusion;
-  if (workingMemory.total_high && workingMemory.multi_domain_high) {
+  
+  if (total < 65) {
     conclusion = { 
-      level: 4, 
-      label: "Indikasi Signifikan", 
-      desc: "Hasil menunjukkan pola yang sangat konsisten dengan karakteristik autisme spektrum. Sangat disarankan konsultasi dengan profesional.", 
-      color: "#B05E8A", 
-      bg: "#FAF0F5", 
-      badge: "Perlu Evaluasi Profesional" 
+      level: 1, 
+      label: "Di bawah ambang batas (< 65)", 
+      interpretation: "Jawaban Anda berada di bawah ambang batas penelitian asli untuk sifat-sifat terkait autisme. Beberapa sifat individu mungkin masih ada, atau skor berada di bawah ambang batas karena faktor seperti masking (menutupi sifat asli), perbedaan interpretasi, atau variasi individu.",
+      whatToDoNext: "Jika Anda masih merasa memiliki pengalaman autistik, Anda dapat mengeksplorasi faktor lain (misal: kecemasan, ADHD, atau burnout) atau mengambil tes skrining tambahan (misal: AQ, CAT-Q).", 
+      color: "#7C5CBF", 
+      bg: "#F0EBF8", 
+      badge: "Dalam Rentang Tipikal" 
     };
-  } else if (workingMemory.total_high || highDomains.length >= 2) {
+  } else if (total >= 65 && total <= 105) {
+    conclusion = { 
+      level: 2, 
+      label: "Menunjukkan Beberapa Sifat (65 - 105)", 
+      interpretation: "Jawaban Anda menunjukkan beberapa sifat terkait autisme, meskipun skor dalam rentang ini kurang spesifik dan dapat tumpang tindih dengan ADHD, kecemasan, depresi, trauma, burnout, atau pengalaman lainnya.",
+      whatToDoNext: "Rentang ini sering tumpang tindih dengan hal-hal seperti ADHD atau kecemasan, jadi ini bisa menjadi titik awal untuk mengeksplorasi apa yang paling menjelaskan pengalaman Anda. Anda juga bisa mengambil tes skrining tambahan.",
+      color: "#5BA8A0", 
+      bg: "#EBF7F6", 
+      badge: "Indikasi Ringan" 
+    };
+  } else if (total >= 106 && total <= 149) {
     conclusion = { 
       level: 3, 
-      label: "Indikasi Cukup Tinggi", 
-      desc: "Beberapa area menunjukkan pola yang konsisten. Pertimbangkan konsultasi dengan psikolog untuk evaluasi lebih lanjut.", 
+      label: "Keselarasan Lebih Kuat (106 - 149)", 
+      interpretation: "Jawaban Anda menunjukkan keselarasan yang lebih kuat dengan sifat-sifat terkait autisme dan mungkin memerlukan interpretasi klinis yang lebih lengkap dalam konteks pengalaman hidup Anda yang lebih luas.",
+      whatToDoNext: "Banyak orang dalam rentang ini mengeksplorasi lebih jauh melalui tes skrining tambahan (misal: AQ, CAT-Q) atau skrining autisme terstruktur untuk lebih memahami pengalaman mereka.",
       color: "#C07D3A", 
       bg: "#FDF6EE", 
       badge: "Disarankan Konsultasi" 
     };
-  } else if (highDomains.length === 1 || total >= 40) {
+  } else if (total >= 150) {
     conclusion = { 
-      level: 2, 
-      label: "Indikasi Ringan", 
-      desc: "Ada beberapa karakteristik yang muncul, namun belum cukup untuk mengindikasikan pola spektrum autisme secara signifikan.", 
-      color: "#5BA8A0", 
-      bg: "#EBF7F6", 
-      badge: "Pantau & Perhatikan" 
-    };
-  } else {
-    conclusion = { 
-      level: 1, 
-      label: "Tidak Terindikasi", 
-      desc: "Hasil Anda tidak menunjukkan pola yang signifikan. Pola respons Anda berada dalam rentang tipikal.", 
-      color: "#7C5CBF", 
-      bg: "#F0EBF8", 
-      badge: "Dalam Rentang Normal" 
+      level: 4, 
+      label: "Keselarasan Sangat Kuat (150+)", 
+      interpretation: "Keselarasan yang sangat kuat dengan sifat-sifat autisme.",
+      whatToDoNext: "Banyak orang dalam rentang ini mengeksplorasi lebih jauh melalui tes skrining tambahan (misal: AQ, CAT-Q) atau skrining autisme terstruktur profesional untuk lebih memahami pengalaman mereka.",
+      color: "#B05E8A", 
+      bg: "#FAF0F5", 
+      badge: "Perlu Evaluasi Profesional" 
     };
   }
 
