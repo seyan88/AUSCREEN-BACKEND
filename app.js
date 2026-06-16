@@ -109,17 +109,17 @@
 /**
  * @swagger
  *   /api/calculate:
- *   post:
+ *     post:
  *       summary: Menghitung skor RAADS-R menggunakan algoritma Forward Chaining.
  *       tags: [Sistem Pakar]
  *       requestBody:
- *       required: true
- *       content:
+ *         required: true
+ *         content:
  *           application/json:
- *           schema:
+ *             schema:
  *               type: object
  *               properties:
- *               answers:
+ *                 answers:
  *                   type: object
  *                   example: {"0": 3, "1": 2, "2": 1, "3": 0}
  *                   description: Object berisi index soal sebagai key dan value jawaban (0-3).

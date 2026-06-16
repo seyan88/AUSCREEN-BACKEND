@@ -6,13 +6,14 @@ function runForwardChaining(answers) {
   const domainScores = { S: 0, L: 0, SM: 0, CI: 0 };
 
   // 1. Hitung skor per pertanyaan
-  // Frontend mengirimkan object: { "0": 3, "1": 1, "2": 0, ... }
   QUESTIONS.forEach((q, i) => {
-    // Ambil jawaban berdasarkan index. Gunakan parseInt untuk berjaga-jaga jika frontend mengirim string
-    // Jika user belum menjawab soal tersebut (undefined), jadikan default 0
     let raw = 0;
-    if (answers[i] !== undefined && answers[i] !== null) {
-      raw = parseInt(answers[i]); 
+    
+    // CEK FLEKSIBEL: Cari jawaban berdasarkan ID soal (1-80) atau Index (0-79)
+    if (answers[q.id] !== undefined && answers[q.id] !== null) {
+      raw = parseInt(answers[q.id]); // Jika frontend pakai ID Soal
+    } else if (answers[i] !== undefined && answers[i] !== null) {
+      raw = parseInt(answers[i]); // Jika frontend pakai Index
     }
     
     // Balikkan nilai jika properti reversed = true
