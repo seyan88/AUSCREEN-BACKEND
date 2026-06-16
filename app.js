@@ -1,12 +1,12 @@
 // File: app.js
 
-const express = require('express');
-const cors = require('cors');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const express = require("express");
+const cors = require("cors");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
-const { QUESTIONS, DOMAINS, RESPONSE_OPTIONS } = require('./data/raadsData');
-const { runForwardChaining } = require('./services/forwardChaining');
+const { QUESTIONS, DOMAINS, RESPONSE_OPTIONS } = require("./data/raadsData");
+const { runForwardChaining } = require("./services/forwardChaining");
 
 const app = express();
 const port = 3000;
@@ -16,69 +16,86 @@ const port = 3000;
 // ==========================================
 const swaggerOptions = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'API Sistem Pakar RAADS-R',
-      version: '1.0.0',
-      description: 'Dokumentasi interaktif API untuk UAS Sistem Pakar menggunakan algoritma Forward Chaining.',
+      title: "API Sistem Pakar RAADS-R",
+      version: "1.0.0",
+      description:
+        "Dokumentasi interaktif API untuk UAS Sistem Pakar menggunakan algoritma Forward Chaining.",
     },
     servers: [
       {
         url: `http://localhost:${port}`,
-        description: 'Development Server Lokal',
+        description: "Development Server Lokal",
       },
     ],
   },
-  apis: ['./app.js'], 
+  apis: ["./app.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Mengambil aset UI Swagger dari CDN agar tidak crash di Vercel
+const CSS_URL =
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui.min.css";
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCssUrl: CSS_URL,
+    customJs: [
+      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui-bundle.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui-standalone-preset.js",
+    ],
+  }),
+);
 
 // ==========================================
 // MIDDLEWARE
 // ==========================================
-app.use(cors()); 
-app.use(express.json()); 
+app.use(cors());
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Server Backend Sistem Pakar (RAADS-R) Berjalan Lancar! Cek /api-docs untuk dokumentasi.');
+app.get("/", (req, res) => {
+  res.send(
+    "Server Backend Sistem Pakar (RAADS-R) Berjalan Lancar! Cek /api-docs untuk dokumentasi.",
+  );
 });
 
 // ==========================================
 // ENDPOINT 1: MENGIRIM SOAL KE FRONTEND
 // ==========================================
 /**
-  * @swagger
-  *  /api/questions:
-  *    get:
-  *      summary: Mengambil daftar 80 soal RAADS-R beserta config domain dan opsi jawaban.
-  *      tags: [Sistem Pakar]
-  *      responses:
-  *        200:
-  *          description: Berhasil mengambil data soal
+ * @swagger
+ *  /api/questions:
+ *    get:
+ *      summary: Mengambil daftar 80 soal RAADS-R beserta config domain dan opsi jawaban.
+ *      tags: [Sistem Pakar]
+ *      responses:
+ *        200:
+ *          description: Berhasil mengambil data soal
  */
-app.get('/api/questions', (req, res) => {
-  const formattedQuestions = QUESTIONS.map(q => ({
+app.get("/api/questions", (req, res) => {
+  const formattedQuestions = QUESTIONS.map((q) => ({
     id: q.id,
     domain: q.domain,
     text: q.text,
-    reversed: q.reversed || false
+    reversed: q.reversed || false,
   }));
 
   const formattedDomains = {};
   for (const key in DOMAINS) {
     formattedDomains[key] = {
       label: DOMAINS[key].label,
-      total: DOMAINS[key].total
+      total: DOMAINS[key].total,
     };
   }
 
   res.json({
     questions: formattedQuestions,
     domains: formattedDomains,
-    options: RESPONSE_OPTIONS
+    options: RESPONSE_OPTIONS,
   });
 });
 
@@ -110,20 +127,23 @@ app.get('/api/questions', (req, res) => {
  *         500:
  *           description: Terjadi kesalahan di server.
  */
-app.post('/api/calculate', (req, res) => {
+app.post("/api/calculate", (req, res) => {
   try {
     const userAnswers = req.body.answers;
 
     if (!userAnswers || Object.keys(userAnswers).length === 0) {
-      return res.status(400).json({ error: "Data jawaban tidak ditemukan atau kosong." });
+      return res
+        .status(400)
+        .json({ error: "Data jawaban tidak ditemukan atau kosong." });
     }
 
     const result = runForwardChaining(userAnswers);
     res.json(result);
-
   } catch (error) {
     console.error("Terjadi error pada proses kalkulasi:", error);
-    res.status(500).json({ error: "Terjadi kesalahan pada server saat menghitung skor." });
+    res
+      .status(500)
+      .json({ error: "Terjadi kesalahan pada server saat menghitung skor." });
   }
 });
 
